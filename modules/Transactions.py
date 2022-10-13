@@ -5,53 +5,52 @@
 
 """
 
-from Mysqlclass import DbOps
+from modules.Mysqlclass import DbOps
 
-class CustomerOps(DbOps):
+class Transactions(DbOps):
     def __init__(self,database,password,user,table):
         DbOps.__init__(self,database,password,user,table) 
         self.connect()
         self.fetchDbVersion()
+        print ("Connected to Transactions DATABASE")
 
-    def authCheck(self):
-        account_number = int(input("Enter account number"))
-        docs = self.read()
-        for doc in docs :
-            if account_number in doc:
-                name = doc[1]
-                print (f"Welcome {name} ....")
-                password = input("Enter password")
-                if password == doc[3]:
-                    return True,doc
-                else:
-                    return False,"Wrong password"
-            else:
-                return False,"Account not found"
 
-    def displayMoney(self):
-        checkReturn,doc = self.authCheck()
-        if (checkReturn):
-            print (doc[2]) 
+    def displayMoney(self,accountNumber):
+        conditionData = {"condition":"account_number","value":accountNumber}
+        result = self.readById(conditionData)
+        print (f" {accountNumber}'s Balance = {result[2]}")
 
-    def depositMoney(self):
-        checkReturn,doc = self.authCheck()
+    def depositMoney(self,accountNumber):
         deposit_amount = int(input("Deposit amount : "))
-        if (checkReturn):
-            self.update({"account_number":doc[0]},{"balance":deposit_amount})
+        conditionData = {"condition":"account_number","value":accountNumber}
+        doc = self.readById(conditionData)
+        data = [("balance",doc[2]+deposit_amount)]
+        self.update(conditionData,data)
             
-
-    def withdrawMoney(self):
-        checkReturn,doc = self.authCheck()
+    def withdrawMoney(self,accountNumber):
         withdraw_amount = int(input("Withdraw amount : "))
-        if (checkReturn):
-            self.update({"account_number":doc[0]},{"balance":withdraw_amount})
-             
+        conditionData = {"condition":"account_number","value":accountNumber}
+        doc = self.readById(conditionData)
+        if (withdraw_amount < doc[2]):
+            data = [("balance",doc[2]-withdraw_amount)]
+            self.update(conditionData,data)
+        else:
+            print ("Insufficient Funds !!!")     
 
-DbOps.host = '127.0.0.1'
-DbOps.port = 3307
-
-database = 'bank'
-password = 'pMac'
-user = 'root'
-table = 'transactions'
-
+    def firstDeposit(self,details):
+        deposit = input(" Add your initial deposit .. ")
+        self.create(
+                        [
+                            "account_number",
+                            "name",
+                            "balance",
+                            "account_pin",
+                        ],
+                        [
+                            details[0],
+                            "'"+details[1]+"'",
+                            deposit,
+                            details[2] 
+                        ]
+                        )
+        

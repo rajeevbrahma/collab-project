@@ -1,2 +1,1 @@
-create table customers (account_number int,name varchar(50),ssn varchar(4) unique,account_pin varchar(4), primary key(account_number));
-
+create table customers (account_number int,name varchar(50),dob varchar(10),ssn varchar(4) unique,account_pin int(4),door_no varchar(10),street varchar(20),city varchar(50),pincode int, primary key(account_number));

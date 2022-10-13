@@ -72,9 +72,11 @@ class DbOps:
     def readById(self,data):
         condition = data["condition"]
         value = data["value"]
-        self.cursor.execute(f"SELECT * FROM {self.table} WHERE {condition}={value};") 
+        print (data)
+        query = f"SELECT * FROM {self.table} WHERE {condition}={value};"
+        self.cursor.execute(query) 
         result = self.cursor.fetchone()
-        print (result)
+        return result
 
     def update(self,conditionData,data):
         condition = conditionData["condition"]
